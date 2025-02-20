@@ -35,8 +35,9 @@ class ProcessManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Metodo para gerar processos secundários
   void _generateSecondaryProcesses(Process mainProcess) {
-    final count = _random.nextInt(3) + 7; 
+    final count = _random.nextInt(3) + 7;
     final maxSlotSize = mainProcess.size ~/ 2;
 
     for (var i = 0; i < count; i++) {
@@ -56,11 +57,13 @@ class ProcessManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Metodo para verificar se é possível iniciar um processo secundário
   bool _canStartProcess(Process process, int maxSlotSize) {
     return _activeSecondaryProcesses.length < maxConcurrentProcesses &&
            _currentProcessingSize + process.size <= maxSlotSize;
   }
 
+  // Metodo para iniciar um processo secundário
   void _startSecondaryProcess(Process process) {
     _activeSecondaryProcesses.add(process);
     _currentProcessingSize += process.size;
@@ -68,6 +71,7 @@ class ProcessManager extends ChangeNotifier {
     _startProgressTimer(process);
   }
 
+  // Metodo para iniciar o timer de progresso
   void _startProgressTimer(Process process) {
     if (process.isMain) {
       process.status = ProcessStatus.running;
@@ -94,6 +98,7 @@ class ProcessManager extends ChangeNotifier {
     });
   }
 
+  // Metodo para verificar se é possível completar um processo principal
   bool _canCompleteMainProcess(Process mainProcess) {
     final hasUnfinishedProcesses = _pendingSecondaryProcesses
         .any((p) => p.parentProcess == mainProcess) ||
@@ -109,6 +114,7 @@ class ProcessManager extends ChangeNotifier {
            mainProcess.progress >= 1.0;
   }
 
+  // Metodo para completar um processo secundário
   void _completeSecondaryProcess(Process process) {
     _secondaryProcesses.remove(process);
     _completedProcesses.add(process);
@@ -117,7 +123,6 @@ class ProcessManager extends ChangeNotifier {
     process.isCompleted = true;
     process.status = ProcessStatus.completed;
 
-    // Try to start pending processes
     if (process.parentProcess != null) {
       _tryStartPendingProcesses(process.parentProcess!);
     }
@@ -130,6 +135,7 @@ class ProcessManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Metodo para tentar iniciar processos secundários pendentes
   void _tryStartPendingProcesses(Process mainProcess) {
     final maxSlotSize = mainProcess.size ~/ 2;
     
@@ -144,6 +150,7 @@ class ProcessManager extends ChangeNotifier {
     }
   }
 
+  // Metodo para completar um processo principal
   void _completeMainProcess(Process process) {
     _mainProcesses.remove(process);
     _completedProcesses.add(process);
@@ -151,6 +158,7 @@ class ProcessManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Metodo para remover um processo
   void removeProcess(Process process) {
     _progressTimers[process]?.cancel();
     _progressTimers.remove(process);
@@ -184,6 +192,7 @@ class ProcessManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Metodo para atualizar o progresso de um processo
   void updateProgress(Process process, double progress) {
     final index = _mainProcesses.indexOf(process);
     if (index != -1) {

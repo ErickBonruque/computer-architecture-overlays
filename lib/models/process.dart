@@ -31,7 +31,7 @@ class Process {
   }) {
     final random = Random();
     final maxSize = parent.size ~/ 2;
-    final size = random.nextInt(maxSize - 30 + 1) + 30; // Random between 30 and maxSize
+    final size = random.nextInt(maxSize - 30 + 1) + 30;
 
     return Process(
       name: 'Processo Secundário - $index - ${parent.name}',
