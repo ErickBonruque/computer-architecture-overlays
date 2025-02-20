@@ -44,7 +44,7 @@ class ProcessManager extends ChangeNotifier {
 
   void _startProgressTimer(Process process) {
     final progressIncrement = 0.01 + (_random.nextDouble() * 0.02);
-    const updateInterval = Duration(milliseconds: 350);
+    const updateInterval = Duration(milliseconds: 500);
 
     _progressTimers[process] = Timer.periodic(updateInterval, (timer) {
       process.progress = (process.progress + progressIncrement).clamp(0.0, 1.0);
