@@ -12,7 +12,7 @@ class ProcessManager extends ChangeNotifier {
   final Map<Process, Timer> _progressTimers = {};
   final Queue<Process> _pendingSecondaryProcesses = Queue<Process>();
   final Set<Process> _activeSecondaryProcesses = {};
-  static const int maxConcurrentProcesses = 4;
+  static const int maxConcurrentProcesses = 4; // Máximo de processos simultâneos
   int _currentProcessingSize = 0;
 
   List<Process> get mainProcesses => List.unmodifiable(_mainProcesses);
@@ -35,7 +35,7 @@ class ProcessManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Metodo para gerar processos secundários
+  // Gera 7-10 processos secundários automaticamente
   void _generateSecondaryProcesses(Process mainProcess) {
     final count = _random.nextInt(3) + 7;
     final maxSlotSize = mainProcess.size ~/ 2;
@@ -45,6 +45,7 @@ class ProcessManager extends ChangeNotifier {
         index: i,
         parent: mainProcess,
       );
+      // Tamanho entre 30KB e metade do processo principal
       
       _secondaryProcesses.add(secondaryProcess);
       
@@ -59,8 +60,8 @@ class ProcessManager extends ChangeNotifier {
 
   // Metodo para verificar se é possível iniciar um processo secundário
   bool _canStartProcess(Process process, int maxSlotSize) {
-    return _activeSecondaryProcesses.length < maxConcurrentProcesses &&
-           _currentProcessingSize + process.size <= maxSlotSize;
+    return _activeSecondaryProcesses.length < maxConcurrentProcesses && // Máximo 4 processos
+           _currentProcessingSize + process.size <= maxSlotSize; // Não exceder tamanho máximo
   }
 
   // Metodo para iniciar um processo secundário
@@ -74,16 +75,16 @@ class ProcessManager extends ChangeNotifier {
   // Metodo para iniciar o timer de progresso
   void _startProgressTimer(Process process) {
     if (process.isMain) {
-      process.status = ProcessStatus.running;
+      process.status = ProcessStatus.running; // Inicia o processo principal
     }
     
-    final progressIncrement = 0.01 + (_random.nextDouble() * 0.02);
+    final progressIncrement = 0.01 + (_random.nextDouble() * 0.02); // Velocidade aleatória
     const updateInterval = Duration(milliseconds: 250);
 
     _progressTimers[process] = Timer.periodic(updateInterval, (timer) {
       process.progress = (process.progress + progressIncrement).clamp(0.0, 1.0);
       
-      if (process.progress >= 1.0) {
+      if (process.progress >= 1.0) {  // Processo concluído
         timer.cancel();
         _progressTimers.remove(process);
         process.status = ProcessStatus.completed;
@@ -100,15 +101,18 @@ class ProcessManager extends ChangeNotifier {
 
   // Metodo para verificar se é possível completar um processo principal
   bool _canCompleteMainProcess(Process mainProcess) {
+    // Verifica se ainda existem processos secundários pendentes
     final hasUnfinishedProcesses = _pendingSecondaryProcesses
         .any((p) => p.parentProcess == mainProcess) ||
         _secondaryProcesses
         .any((p) => p.parentProcess == mainProcess);
 
+    // Verifica se existem processos secundários concluídos
     final completedSecondaries = _completedProcesses
         .where((p) => !p.isMain && p.parentProcess == mainProcess)
         .toList();
 
+    // Processo principal só conclui quando todos secundários terminam
     return !hasUnfinishedProcesses && 
            completedSecondaries.isNotEmpty && 
            mainProcess.progress >= 1.0;
@@ -141,7 +145,7 @@ class ProcessManager extends ChangeNotifier {
     
     while (_pendingSecondaryProcesses.isNotEmpty) {
       final nextProcess = _pendingSecondaryProcesses.first;
-      if (_canStartProcess(nextProcess, maxSlotSize)) {
+      if (_canStartProcess(nextProcess, maxSlotSize)) { // Verifica se é possível iniciar
         _pendingSecondaryProcesses.removeFirst();
         _startSecondaryProcess(nextProcess);
       } else {
