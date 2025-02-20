@@ -53,18 +53,20 @@ class ProcessManager extends ChangeNotifier {
         _pendingSecondaryProcesses.add(secondaryProcess);
       }
     }
-    // Try to start additional processes after initial generation
+      // Otimiza a alocação de processos secundários
     _optimizeProcessAllocation(mainProcess);
     notifyListeners();
   }
 
   void _optimizeProcessAllocation(Process mainProcess) {
     final maxSlotSize = mainProcess.size ~/ 2;
+
+    // Filtra os processos secundários pendentes para este processo principal
     List<Process> pendingForThisMain = _pendingSecondaryProcesses
         .where((p) => p.parentProcess == mainProcess)
         .toList();
     
-    // Sort pending processes by size to optimize slot usage
+    // Ordena os processos secundários pendentes por tamanho
     pendingForThisMain.sort((a, b) => a.size.compareTo(b.size));
     
     for (var process in pendingForThisMain) {
@@ -81,7 +83,7 @@ class ProcessManager extends ChangeNotifier {
       return false;
     }
 
-    // Calculate current processing size for this main process
+    // Verifica se o tamanho do processo não excede o tamanho máximo
     int currentSizeForMain = _activeSecondaryProcesses
         .where((p) => p.parentProcess == process.parentProcess)
         .fold(0, (sum, p) => sum + p.size);
@@ -148,7 +150,7 @@ class ProcessManager extends ChangeNotifier {
     process.status = ProcessStatus.completed;
 
     if (process.parentProcess != null) {
-      // Try to start new processes after one completes
+      // Tenta iniciar um novo processo secundário quando um é concluído
       _optimizeProcessAllocation(process.parentProcess!);
       
       if (process.parentProcess!.progress >= 1.0 && 
