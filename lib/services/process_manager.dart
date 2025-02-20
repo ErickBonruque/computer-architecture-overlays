@@ -31,21 +31,20 @@ class ProcessManager extends ChangeNotifier {
   }
 
   void _generateSecondaryProcesses(Process mainProcess) {
-    final count = _random.nextInt(6) + 7; // Random number between 7 and 12
+    final count = _random.nextInt(7) + 7;
     for (var i = 0; i < count; i++) {
       final secondaryProcess = Process.secondary(
         index: i,
         parent: mainProcess,
       );
       _secondaryProcesses.add(secondaryProcess);
-      _startProgressTimer(secondaryProcess); // Start timer for each secondary process
+      _startProgressTimer(secondaryProcess);
     }
   }
 
   void _startProgressTimer(Process process) {
-    // Calculate random progress increment between 0.01 and 0.03
     final progressIncrement = 0.01 + (_random.nextDouble() * 0.02);
-    const updateInterval = Duration(milliseconds: 500);
+    const updateInterval = Duration(milliseconds: 250);
 
     _progressTimers[process] = Timer.periodic(updateInterval, (timer) {
       process.progress = (process.progress + progressIncrement).clamp(0.0, 1.0);
@@ -72,8 +71,7 @@ class ProcessManager extends ChangeNotifier {
     final completedSecondaries = _completedProcesses
         .where((p) => !p.isMain && p.parentProcess == mainProcess)
         .toList();
-    
-    // Check if all secondary processes are completed
+
     return secondaryProcesses.isEmpty && 
            completedSecondaries.isNotEmpty && 
            mainProcess.progress >= 1.0;
@@ -83,8 +81,7 @@ class ProcessManager extends ChangeNotifier {
     _secondaryProcesses.remove(process);
     _completedProcesses.add(process);
     process.isCompleted = true;
-    
-    // Check if parent process can be completed
+  
     if (process.parentProcess != null && 
         process.parentProcess!.progress >= 1.0 && 
         _canCompleteMainProcess(process.parentProcess!)) {
@@ -105,7 +102,6 @@ class ProcessManager extends ChangeNotifier {
     _progressTimers.remove(process);
     
     if (process.isMain) {
-      // Cancel timers for all associated secondary processes
       _secondaryProcesses
           .where((p) => p.parentProcess == process)
           .forEach((p) {
