@@ -30,7 +30,7 @@ class Process {
     required Process parent,
   }) {
     final random = Random();
-    final maxSize = parent.size ~/ 2;
+    final maxSize = parent.size ~/ 3;
     final size = random.nextInt(maxSize - 30 + 1) + 30;
 
     return Process(
