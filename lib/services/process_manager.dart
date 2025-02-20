@@ -36,7 +36,7 @@ class ProcessManager extends ChangeNotifier {
   }
 
   void _generateSecondaryProcesses(Process mainProcess) {
-    final count = _random.nextInt(3) + 7; // 7-9 secondary processes
+    final count = _random.nextInt(3) + 7; 
     final maxSlotSize = mainProcess.size ~/ 2;
 
     for (var i = 0; i < count; i++) {
@@ -45,7 +45,7 @@ class ProcessManager extends ChangeNotifier {
         parent: mainProcess,
       );
       
-      _secondaryProcesses.add(secondaryProcess); // Add to visible list immediately
+      _secondaryProcesses.add(secondaryProcess);
       
       if (_canStartProcess(secondaryProcess, maxSlotSize)) {
         _startSecondaryProcess(secondaryProcess);
@@ -64,7 +64,7 @@ class ProcessManager extends ChangeNotifier {
   void _startSecondaryProcess(Process process) {
     _activeSecondaryProcesses.add(process);
     _currentProcessingSize += process.size;
-    process.status = ProcessStatus.running; // Update status when starting
+    process.status = ProcessStatus.running;
     _startProgressTimer(process);
   }
 
@@ -82,7 +82,7 @@ class ProcessManager extends ChangeNotifier {
       if (process.progress >= 1.0) {
         timer.cancel();
         _progressTimers.remove(process);
-        process.status = ProcessStatus.completed; // Update status when completed
+        process.status = ProcessStatus.completed;
         
         if (!process.isMain) {
           _completeSecondaryProcess(process);
@@ -156,7 +156,6 @@ class ProcessManager extends ChangeNotifier {
     _progressTimers.remove(process);
     
     if (process.isMain) {
-      // Update current processing size and clean up
       _secondaryProcesses
           .where((p) => p.parentProcess == process)
           .forEach((p) {
