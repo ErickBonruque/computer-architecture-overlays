@@ -98,6 +98,46 @@ class CompletedProcessesPage extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: Consumer<ProcessManager>(
+        builder: (context, manager, child) {
+          if (manager.completedProcesses.isEmpty) return const SizedBox.shrink();
+          
+          return FloatingActionButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Limpar Histórico'),
+                    content: const Text(
+                      'Deseja limpar todo o histórico de processos concluídos?'
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.read<ProcessManager>().clearCompletedProcesses();
+                          Navigator.pop(context);
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red,
+                        ),
+                        child: const Text('Limpar'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            backgroundColor: Colors.red,
+            child: const Icon(Icons.delete_forever),
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

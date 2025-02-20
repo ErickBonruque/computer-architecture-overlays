@@ -1,5 +1,11 @@
 import 'dart:math';
 
+enum ProcessStatus {
+  waiting,
+  running,
+  completed
+}
+
 class Process {
   final String name;
   final int size;
@@ -7,6 +13,7 @@ class Process {
   bool isCompleted;
   final bool isMain;
   final Process? parentProcess;
+  ProcessStatus status;
 
   Process({
     required this.name, 
@@ -15,6 +22,7 @@ class Process {
     this.isCompleted = false,
     this.isMain = true,
     this.parentProcess,
+    this.status = ProcessStatus.waiting,
   });
 
   factory Process.secondary({
@@ -30,6 +38,7 @@ class Process {
       size: size,
       isMain: false,
       parentProcess: parent,
+      status: ProcessStatus.waiting,
     );
   }
 }

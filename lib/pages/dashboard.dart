@@ -25,17 +25,44 @@ class _DashboardPageState extends State<DashboardPage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${process.size} KBs'),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: process.progress,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    process.progress >= 1.0 ? Colors.green : Colors.blue,
-                  ),
+                Row(
+                  children: [
+                    Text('${process.size} KBs'),
+                    if (!process.isMain) ...[
+                      const SizedBox(width: 8),
+                      Icon(
+                        process.status == ProcessStatus.waiting 
+                          ? Icons.hourglass_empty 
+                          : Icons.running_with_errors,
+                        size: 16,
+                        color: process.status == ProcessStatus.waiting 
+                          ? Colors.orange 
+                          : Colors.blue,
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text('${(process.progress * 100).toStringAsFixed(1)}%'),
+                const SizedBox(height: 8),
+                if (!process.isMain && process.status == ProcessStatus.waiting)
+                  const Text(
+                    'Aguardando slot de processamento...',
+                    style: TextStyle(color: Colors.orange),
+                  )
+                else if (process.status != ProcessStatus.waiting)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LinearProgressIndicator(
+                        value: process.progress,
+                        backgroundColor: Colors.grey[200],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          process.progress >= 1.0 ? Colors.green : Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('${(process.progress * 100).toStringAsFixed(1)}%'),
+                    ],
+                  ),
               ],
             ),
             trailing: IconButton(
